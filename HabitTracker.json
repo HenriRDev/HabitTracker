@@ -1,0 +1,881 @@
+{
+  "name": "HabitTracker",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -736,
+        32
+      ],
+      "id": "b26c28b9-27ba-4ba8-b9b2-f58742a8a71a",
+      "name": "Inicio fluxo",
+      "webhookId": "39b8012c-d4c5-47f2-af63-0f64f05d8a38",
+      "credentials": {
+        "telegramApi": {
+          "id": "cGvSWvM8mBQNtAzH",
+          "name": "bot habitos"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5d9613b0-871a-40dd-b2ef-911fd0164b61",
+              "name": "messageId",
+              "value": "={{ $json.message.from.id }}",
+              "type": "number"
+            },
+            {
+              "id": "08d2ed1c-3e2b-4baf-b292-49f6d8e1e1b0",
+              "name": "chatId",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "number"
+            },
+            {
+              "id": "aae421b6-e8e9-4841-a3be-f6eef6dee99e",
+              "name": "mensagem",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -528,
+        32
+      ],
+      "id": "880e5ce3-6360-43ce-93a0-aa4e9c2ba800",
+      "name": "filtraInformacoes"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\n\nconst options = { timeZone: 'America/Sao_Paulo' };\n\nconst data = now.toLocaleDateString('pt-BR', { \n  ...options,\n  day: '2-digit',\n  month: '2-digit',\n  year: 'numeric'\n});\n\nconst hora = now.toLocaleTimeString('pt-BR', { \n  ...options,\n  hour: '2-digit', \n  minute: '2-digit' \n});\n\nreturn {\n  mensagem: $input.first().json.text,\n  data: data,\n  hora: hora\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        32
+      ],
+      "id": "5abe5623-5712-4e28-b5cd-dbe6ae3024cb",
+      "name": "forcaHorarioEmUTC"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -112
+      ],
+      "id": "d30598e2-1bc2-46a6-b698-9aae452bb1a0",
+      "name": "LLM",
+      "credentials": {
+        "groqApi": {
+          "id": "LO16wblMgmD0gUbI",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7fada617-39d3-4679-9f64-cad849b61268",
+              "leftValue": "={{ $json.habito }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        752,
+        -272
+      ],
+      "id": "88c8fc51-8d25-4900-9f02-cad2d6078857",
+      "name": "verificaHabito"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Inicio fluxo').item.json.message.chat.id }}",
+        "text": "Desculpe mas isso não é um hábito, me diga algo que você fez hoje 😊",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        -352
+      ],
+      "id": "b1b35c9f-72ac-46ad-b93f-ac9bc6f08499",
+      "name": "habitoInvalido",
+      "webhookId": "44ade4e5-38e6-4254-a897-d63de4dcf727",
+      "credentials": {
+        "telegramApi": {
+          "id": "cGvSWvM8mBQNtAzH",
+          "name": "bot habitos"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8d7f0c1b-44db-48a8-a474-c3a9ba3b62ac",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        944,
+        -96
+      ],
+      "id": "fd581031-4bfb-47f4-8cd6-78978a3efee1",
+      "name": "verificaErro"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.output;\nconst parsed = JSON.parse(text);\nreturn parsed;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        -272
+      ],
+      "id": "5b0e3cc7-876d-4ace-aa09-68bc5f9b818c",
+      "name": "transformaEmHabitos"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Inicio fluxo').item.json.message.text }}",
+        "options": {
+          "systemMessage": "Você é um assistente de registro de hábitos. Sua única função é extrair informações de hábitos de mensagens informais e retornar um JSON estruturado.\n\nVocê receberá sempre três informações antes da mensagem do usuário:\n- Data atual (use exatamente como fornecida, não altere)\n- Hora atual (use exatamente como fornecida, não altere)\n- Mensagem do usuário\n\nRetorne APENAS um JSON válido, sem texto antes ou depois, sem markdown, sem explicação:\n\n{\n  \"data\": \"25/04/2026\",\n  \"hora\": \"14:35\",\n  \"habito\": \"estudo de n8n\",\n  \"categoria\": \"Estudo\",\n  \"duracao_minutos\": 120,\n  \"mensagem_original\": \"estudei 2h de n8n\"\n}\n\nRegras:\n- data e hora: use EXATAMENTE os valores fornecidos no início da mensagem, nunca invente ou altere\n- habito: o que foi feito de forma curta e clara\n- categoria: classifique em uma dessas: Estudo, Saúde, Sono, Lazer, Trabalho, Alimentação, Outro\n- duracao_minutos: número inteiro em minutos, ou null se não mencionado\n- mensagem_original: copie exatamente o que o usuário escreveu, sem alterar nada\n\nSe a mensagem não for sobre um hábito, retorne:\n{\n  \"data\": \"data fornecida\",\n  \"hora\": \"hora fornecida\",\n  \"habito\": null,\n  \"categoria\": null,\n  \"duracao_minutos\": null,\n  \"mensagem_original\": \"texto original do usuário aqui\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        192,
+        -272
+      ],
+      "id": "0e797aa1-ab34-4cb5-bb2d-ea19345ca6b4",
+      "name": "agentePrincipal",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Inicio fluxo').item.json.message.chat.id }}",
+        "text": "Desculpe, mas ocorreu um erro no workflow!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1168,
+        -176
+      ],
+      "id": "dedde83d-0b42-4161-bb5a-ce16cd4bc63c",
+      "name": "mensagemErro",
+      "webhookId": "5c374d8d-9bff-4916-81b8-402d5170d9f2",
+      "credentials": {
+        "telegramApi": {
+          "id": "cGvSWvM8mBQNtAzH",
+          "name": "bot habitos"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1hCGb9tn8FtFvHk4wlGVweb0Ib1hrOJBTaeSlBCBjsS0",
+          "mode": "list",
+          "cachedResultName": "log de hábitos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hCGb9tn8FtFvHk4wlGVweb0Ib1hrOJBTaeSlBCBjsS0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hCGb9tn8FtFvHk4wlGVweb0Ib1hrOJBTaeSlBCBjsS0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "data": "={{ $('forcaHorarioEmUTC').item.json.data }}",
+            "hora": "={{ $('forcaHorarioEmUTC').item.json.hora }}",
+            "chat_id": "={{ $('Inicio fluxo').item.json.message.chat.id }}",
+            "habito": "={{ $('transformaEmHabitos').item.json.habito }}",
+            "categoria": "={{ $('transformaEmHabitos').item.json.categoria }}",
+            "duracao_minutos": "={{ $('transformaEmHabitos').item.json.duracao_minutos }}",
+            "mensagem_original": "={{ $('transformaEmHabitos').item.json.mensagem_original }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "hora",
+              "displayName": "hora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "habito",
+              "displayName": "habito",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duracao_minutos",
+              "displayName": "duracao_minutos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "mensagem_original",
+              "displayName": "mensagem_original",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1168,
+        0
+      ],
+      "id": "09b9a3d3-1b8b-434f-8321-af5958f949c3",
+      "name": "anotaHabito",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "QjUwXFdjh0HfSYSK",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Inicio fluxo').item.json.message.chat.id }}",
+        "text": "Hábito anotado com sucesso! ",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        0
+      ],
+      "id": "403195fc-0221-4c72-bf50-a2f586bc4101",
+      "name": "confirmaHabito",
+      "webhookId": "80576260-e9e5-4723-b5a4-863ecc8efe15",
+      "credentials": {
+        "telegramApi": {
+          "id": "cGvSWvM8mBQNtAzH",
+          "name": "bot habitos"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1hCGb9tn8FtFvHk4wlGVweb0Ib1hrOJBTaeSlBCBjsS0",
+          "mode": "list",
+          "cachedResultName": "log de hábitos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hCGb9tn8FtFvHk4wlGVweb0Ib1hrOJBTaeSlBCBjsS0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hCGb9tn8FtFvHk4wlGVweb0Ib1hrOJBTaeSlBCBjsS0/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "chat_id",
+              "lookupValue": "={{ $('Inicio fluxo').item.json.message.chat.id }}"
+            },
+            {
+              "lookupColumn": "data",
+              "lookupValue": "={{ $('forcaHorarioEmUTC').item.json.data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        48
+      ],
+      "id": "814b1712-e122-4e80-a452-228f4c9cdef0",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "QjUwXFdjh0HfSYSK",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Inicio fluxo').item.json.message.chat.id }}",
+        "text": "={{ $json.mensagem }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        48
+      ],
+      "id": "1391ddf5-dd2a-49d9-baef-78760a0ce85b",
+      "name": "Send a text message",
+      "webhookId": "ea081574-e708-4b93-a44e-859b9061c770",
+      "credentials": {
+        "telegramApi": {
+          "id": "cGvSWvM8mBQNtAzH",
+          "name": "bot habitos"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1hCGb9tn8FtFvHk4wlGVweb0Ib1hrOJBTaeSlBCBjsS0",
+          "mode": "list",
+          "cachedResultName": "log de hábitos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hCGb9tn8FtFvHk4wlGVweb0Ib1hrOJBTaeSlBCBjsS0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hCGb9tn8FtFvHk4wlGVweb0Ib1hrOJBTaeSlBCBjsS0/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "chat_id",
+              "lookupValue": "={{ $('Inicio fluxo').item.json.message.chat.id }}"
+            },
+            {
+              "lookupColumn": "data",
+              "lookupValue": "={{ $('forcaHorarioEmUTC').item.json.data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        224
+      ],
+      "id": "10777267-27e2-4c6c-ba5b-14c44c4a4ba2",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "QjUwXFdjh0HfSYSK",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Inicio fluxo').item.json.message.chat.id }}",
+        "text": "={{ $json.mensagem }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        224
+      ],
+      "id": "b9d0c144-5222-4fd6-96a3-9243091cce37",
+      "name": "Send a text message1",
+      "webhookId": "ea081574-e708-4b93-a44e-859b9061c770",
+      "credentials": {
+        "telegramApi": {
+          "id": "1sX7WwosVBPs57FK",
+          "name": "Bot sorteio"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "50beb0e8-37fb-421a-87e6-aace5680a68a",
+                    "leftValue": "={{ $('Inicio fluxo').item.json.message.text }}",
+                    "rightValue": "/",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notStartsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('filtraInformacoes').item.json.mensagem }}",
+                    "rightValue": "/meus_habitos",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "id": "9e1ceba2-3c4e-4226-80be-94e3bbbe0341"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Checkar hábitos"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "aea1cd5c-5246-401e-b8ad-75bdb4ab6f6b",
+                    "leftValue": "={{ $('filtraInformacoes').item.json.mensagem }}",
+                    "rightValue": "/streak",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Verificar sequência "
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -112,
+        16
+      ],
+      "id": "6cb588cd-3cb1-42d4-a5e9-281851fefae6",
+      "name": "verificaAcao"
+    },
+    {
+      "parameters": {
+        "jsCode": "const habitos = $input.all();\n\nif (habitos.length === 0) {\n  return { mensagem: \"Você não registrou nenhum hábito hoje ainda! 😴\" };\n}\n\nconst lista = habitos.map(h => \n  `• ${h.json.habito} (${h.json.categoria} - ${h.json.duracao_minutos || '?'} min)`\n).join('\\n');\n\nreturn { mensagem: `Seus hábitos de hoje:\\n\\n${lista}` };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        48
+      ],
+      "id": "b47cf68e-93fd-4e5e-a00d-389a7d4b360e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const habitos = $input.all();\n\nif (habitos.length === 0) {\n  return { mensagem: \"Você ainda não registrou nenhum hábito! 😴\" };\n}\n\n// Filtra linhas que têm data válida\nconst datasValidas = habitos\n  .map(h => h.json.data)\n  .filter(d => d !== undefined && d !== null && String(d).includes('/'));\n\nif (datasValidas.length === 0) {\n  return { mensagem: \"Nenhum hábito com data válida encontrado!\" };\n}\n\n// Pega datas únicas e ordena\nconst datas = [...new Set(datasValidas)];\n\nconst datasOrdenadas = datas\n  .map(d => {\n    const [dia, mes, ano] = d.split('/');\n    return new Date(`${ano}-${mes}-${dia}`);\n  })\n  .sort((a, b) => b - a);\n\nlet streak = 1;\nfor (let i = 0; i < datasOrdenadas.length - 1; i++) {\n  const diff = (datasOrdenadas[i] - datasOrdenadas[i + 1]) / (1000 * 60 * 60 * 24);\n  if (diff === 1) {\n    streak++;\n  } else {\n    break;\n  }\n}\n\nreturn { mensagem: `🔥 Seu streak atual é de *${streak} dia(s)* consecutivo(s)!` };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        224
+      ],
+      "id": "b3c8b4f4-2c09-4c2e-a6cd-3c8fd1f4421d",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "pinData": {
+    "Inicio fluxo": [
+      {
+        "json": {
+          "update_id": 170754772,
+          "message": {
+            "message_id": 19,
+            "from": {
+              "id": 8758569763,
+              "is_bot": false,
+              "first_name": "Carlos",
+              "language_code": "pt-br"
+            },
+            "chat": {
+              "id": 8758569763,
+              "first_name": "Carlos",
+              "type": "private"
+            },
+            "date": 1777857310,
+            "text": "/streak",
+            "entities": [
+              {
+                "offset": 0,
+                "length": 6,
+                "type": "bot_command"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Inicio fluxo": {
+      "main": [
+        [
+          {
+            "node": "filtraInformacoes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "filtraInformacoes": {
+      "main": [
+        [
+          {
+            "node": "forcaHorarioEmUTC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "forcaHorarioEmUTC": {
+      "main": [
+        [
+          {
+            "node": "verificaAcao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "agentePrincipal",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verificaHabito": {
+      "main": [
+        [
+          {
+            "node": "habitoInvalido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "verificaErro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verificaErro": {
+      "main": [
+        [
+          {
+            "node": "mensagemErro",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "anotaHabito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "transformaEmHabitos": {
+      "main": [
+        [
+          {
+            "node": "verificaHabito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agentePrincipal": {
+      "main": [
+        [
+          {
+            "node": "transformaEmHabitos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "anotaHabito": {
+      "main": [
+        [
+          {
+            "node": "confirmaHabito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "verificaAcao": {
+      "main": [
+        [
+          {
+            "node": "agentePrincipal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "America/Sao_Paulo",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "timeSavedPerExecution": 30
+  },
+  "versionId": "e6c78dc2-0cee-4a7c-a8eb-42a1e3c8348e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d381ddd265b9703f70f6319a0d24c33a82e2230bd1d1992c3365214d6a032e5c"
+  },
+  "id": "FumKAP9Cf3s6dEs6",
+  "tags": [
+    {
+      "updatedAt": "2026-04-27T16:03:31.065Z",
+      "createdAt": "2026-04-27T16:03:31.065Z",
+      "id": "s10Pgl58LQK9lmR6",
+      "name": "Hábitos"
+    }
+  ]
+}
