@@ -26,41 +26,6 @@
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "5d9613b0-871a-40dd-b2ef-911fd0164b61",
-              "name": "messageId",
-              "value": "={{ $json.message.from.id }}",
-              "type": "number"
-            },
-            {
-              "id": "08d2ed1c-3e2b-4baf-b292-49f6d8e1e1b0",
-              "name": "chatId",
-              "value": "={{ $json.message.chat.id }}",
-              "type": "number"
-            },
-            {
-              "id": "aae421b6-e8e9-4841-a3be-f6eef6dee99e",
-              "name": "mensagem",
-              "value": "={{ $json.message.text }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -528,
-        32
-      ],
-      "id": "880e5ce3-6360-43ce-93a0-aa4e9c2ba800",
-      "name": "filtraInformacoes"
-    },
-    {
-      "parameters": {
         "jsCode": "const now = new Date();\n\nconst options = { timeZone: 'America/Sao_Paulo' };\n\nconst data = now.toLocaleDateString('pt-BR', { \n  ...options,\n  day: '2-digit',\n  month: '2-digit',\n  year: 'numeric'\n});\n\nconst hora = now.toLocaleTimeString('pt-BR', { \n  ...options,\n  hour: '2-digit', \n  minute: '2-digit' \n});\n\nreturn {\n  mensagem: $input.first().json.text,\n  data: data,\n  hora: hora\n};"
       },
       "type": "n8n-nodes-base.code",
@@ -386,6 +351,128 @@
     },
     {
       "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "50beb0e8-37fb-421a-87e6-aace5680a68a",
+                    "leftValue": "={{ $('Inicio fluxo').item.json.message.text }}",
+                    "rightValue": "/",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notStartsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('fixarVariaveis').item.json.mensagem }}",
+                    "rightValue": "/meus_habitos",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "id": "9e1ceba2-3c4e-4226-80be-94e3bbbe0341"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Checkar hábitos"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "aea1cd5c-5246-401e-b8ad-75bdb4ab6f6b",
+                    "leftValue": "={{ $('fixarVariaveis').item.json.mensagem }}",
+                    "rightValue": "/streak",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Verificar sequência "
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -112,
+        16
+      ],
+      "id": "6cb588cd-3cb1-42d4-a5e9-281851fefae6",
+      "name": "verificaAcao"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5d9613b0-871a-40dd-b2ef-911fd0164b61",
+              "name": "messageId",
+              "value": "={{ $json.message.from.id }}",
+              "type": "number"
+            },
+            {
+              "id": "08d2ed1c-3e2b-4baf-b292-49f6d8e1e1b0",
+              "name": "chatId",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "number"
+            },
+            {
+              "id": "aae421b6-e8e9-4841-a3be-f6eef6dee99e",
+              "name": "mensagem",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -528,
+        32
+      ],
+      "id": "880e5ce3-6360-43ce-93a0-aa4e9c2ba800",
+      "name": "fixarVariaveis"
+    },
+    {
+      "parameters": {
         "documentId": {
           "__rl": true,
           "value": "1hCGb9tn8FtFvHk4wlGVweb0Ib1hrOJBTaeSlBCBjsS0",
@@ -421,13 +508,26 @@
         48
       ],
       "id": "814b1712-e122-4e80-a452-228f4c9cdef0",
-      "name": "Get row(s) in sheet",
+      "name": "pegaDadosNecessarios",
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "QjUwXFdjh0HfSYSK",
           "name": "Google Sheets account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const habitos = $input.all();\n\nif (habitos.length === 0) {\n  return { mensagem: \"Você não registrou nenhum hábito hoje ainda! 😴\" };\n}\n\nconst lista = habitos.map(h => \n  `• ${h.json.habito} (${h.json.categoria} - ${h.json.duracao_minutos || '?'} min)`\n).join('\\n');\n\nreturn { mensagem: `Seus hábitos de hoje:\\n\\n${lista}` };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        48
+      ],
+      "id": "b47cf68e-93fd-4e5e-a00d-389a7d4b360e",
+      "name": "converteParaDadosLegiveis"
     },
     {
       "parameters": {
@@ -444,7 +544,7 @@
         48
       ],
       "id": "1391ddf5-dd2a-49d9-baef-78760a0ce85b",
-      "name": "Send a text message",
+      "name": "EnviaMensagemParaUsuario",
       "webhookId": "ea081574-e708-4b93-a44e-859b9061c770",
       "credentials": {
         "telegramApi": {
@@ -490,13 +590,26 @@
         224
       ],
       "id": "10777267-27e2-4c6c-ba5b-14c44c4a4ba2",
-      "name": "Get row(s) in sheet1",
+      "name": "resgataDados",
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "QjUwXFdjh0HfSYSK",
           "name": "Google Sheets account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const habitos = $input.all();\n\nif (habitos.length === 0) {\n  return { mensagem: \"Você ainda não registrou nenhum hábito! 😴\" };\n}\n\n// Filtra linhas que têm data válida\nconst datasValidas = habitos\n  .map(h => h.json.data)\n  .filter(d => d !== undefined && d !== null && String(d).includes('/'));\n\nif (datasValidas.length === 0) {\n  return { mensagem: \"Nenhum hábito com data válida encontrado!\" };\n}\n\n// Pega datas únicas e ordena\nconst datas = [...new Set(datasValidas)];\n\nconst datasOrdenadas = datas\n  .map(d => {\n    const [dia, mes, ano] = d.split('/');\n    return new Date(`${ano}-${mes}-${dia}`);\n  })\n  .sort((a, b) => b - a);\n\nlet streak = 1;\nfor (let i = 0; i < datasOrdenadas.length - 1; i++) {\n  const diff = (datasOrdenadas[i] - datasOrdenadas[i + 1]) / (1000 * 60 * 60 * 24);\n  if (diff === 1) {\n    streak++;\n  } else {\n    break;\n  }\n}\n\nreturn { mensagem: `🔥 Seu streak atual é de *${streak} dia(s)* consecutivo(s)!` };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        224
+      ],
+      "id": "b3c8b4f4-2c09-4c2e-a6cd-3c8fd1f4421d",
+      "name": "pegaInformacoesStreak"
     },
     {
       "parameters": {
@@ -513,7 +626,7 @@
         224
       ],
       "id": "b9d0c144-5222-4fd6-96a3-9243091cce37",
-      "name": "Send a text message1",
+      "name": "RetornaMensagem",
       "webhookId": "ea081574-e708-4b93-a44e-859b9061c770",
       "credentials": {
         "telegramApi": {
@@ -521,119 +634,6 @@
           "name": "Bot sorteio"
         }
       }
-    },
-    {
-      "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "id": "50beb0e8-37fb-421a-87e6-aace5680a68a",
-                    "leftValue": "={{ $('Inicio fluxo').item.json.message.text }}",
-                    "rightValue": "/",
-                    "operator": {
-                      "type": "string",
-                      "operation": "notStartsWith"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              }
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $('filtraInformacoes').item.json.mensagem }}",
-                    "rightValue": "/meus_habitos",
-                    "operator": {
-                      "type": "string",
-                      "operation": "startsWith"
-                    },
-                    "id": "9e1ceba2-3c4e-4226-80be-94e3bbbe0341"
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "Checkar hábitos"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "id": "aea1cd5c-5246-401e-b8ad-75bdb4ab6f6b",
-                    "leftValue": "={{ $('filtraInformacoes').item.json.mensagem }}",
-                    "rightValue": "/streak",
-                    "operator": {
-                      "type": "string",
-                      "operation": "startsWith"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "Verificar sequência "
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.4,
-      "position": [
-        -112,
-        16
-      ],
-      "id": "6cb588cd-3cb1-42d4-a5e9-281851fefae6",
-      "name": "verificaAcao"
-    },
-    {
-      "parameters": {
-        "jsCode": "const habitos = $input.all();\n\nif (habitos.length === 0) {\n  return { mensagem: \"Você não registrou nenhum hábito hoje ainda! 😴\" };\n}\n\nconst lista = habitos.map(h => \n  `• ${h.json.habito} (${h.json.categoria} - ${h.json.duracao_minutos || '?'} min)`\n).join('\\n');\n\nreturn { mensagem: `Seus hábitos de hoje:\\n\\n${lista}` };"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        384,
-        48
-      ],
-      "id": "b47cf68e-93fd-4e5e-a00d-389a7d4b360e",
-      "name": "Code in JavaScript"
-    },
-    {
-      "parameters": {
-        "jsCode": "const habitos = $input.all();\n\nif (habitos.length === 0) {\n  return { mensagem: \"Você ainda não registrou nenhum hábito! 😴\" };\n}\n\n// Filtra linhas que têm data válida\nconst datasValidas = habitos\n  .map(h => h.json.data)\n  .filter(d => d !== undefined && d !== null && String(d).includes('/'));\n\nif (datasValidas.length === 0) {\n  return { mensagem: \"Nenhum hábito com data válida encontrado!\" };\n}\n\n// Pega datas únicas e ordena\nconst datas = [...new Set(datasValidas)];\n\nconst datasOrdenadas = datas\n  .map(d => {\n    const [dia, mes, ano] = d.split('/');\n    return new Date(`${ano}-${mes}-${dia}`);\n  })\n  .sort((a, b) => b - a);\n\nlet streak = 1;\nfor (let i = 0; i < datasOrdenadas.length - 1; i++) {\n  const diff = (datasOrdenadas[i] - datasOrdenadas[i + 1]) / (1000 * 60 * 60 * 24);\n  if (diff === 1) {\n    streak++;\n  } else {\n    break;\n  }\n}\n\nreturn { mensagem: `🔥 Seu streak atual é de *${streak} dia(s)* consecutivo(s)!` };"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        384,
-        224
-      ],
-      "id": "b3c8b4f4-2c09-4c2e-a6cd-3c8fd1f4421d",
-      "name": "Code in JavaScript1"
     }
   ],
   "pinData": {
@@ -673,18 +673,7 @@
       "main": [
         [
           {
-            "node": "filtraInformacoes",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "filtraInformacoes": {
-      "main": [
-        [
-          {
-            "node": "forcaHorarioEmUTC",
+            "node": "fixarVariaveis",
             "type": "main",
             "index": 0
           }
@@ -783,28 +772,6 @@
         ]
       ]
     },
-    "Get row(s) in sheet": {
-      "main": [
-        [
-          {
-            "node": "Code in JavaScript",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get row(s) in sheet1": {
-      "main": [
-        [
-          {
-            "node": "Code in JavaScript1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "verificaAcao": {
       "main": [
         [
@@ -816,36 +783,69 @@
         ],
         [
           {
-            "node": "Get row(s) in sheet",
+            "node": "pegaDadosNecessarios",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Get row(s) in sheet1",
+            "node": "resgataDados",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code in JavaScript": {
+    "fixarVariaveis": {
       "main": [
         [
           {
-            "node": "Send a text message",
+            "node": "forcaHorarioEmUTC",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code in JavaScript1": {
+    "pegaDadosNecessarios": {
       "main": [
         [
           {
-            "node": "Send a text message1",
+            "node": "converteParaDadosLegiveis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "converteParaDadosLegiveis": {
+      "main": [
+        [
+          {
+            "node": "EnviaMensagemParaUsuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "resgataDados": {
+      "main": [
+        [
+          {
+            "node": "pegaInformacoesStreak",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pegaInformacoesStreak": {
+      "main": [
+        [
+          {
+            "node": "RetornaMensagem",
             "type": "main",
             "index": 0
           }
@@ -864,7 +864,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "timeSavedPerExecution": 30
   },
-  "versionId": "e6c78dc2-0cee-4a7c-a8eb-42a1e3c8348e",
+  "versionId": "374469f5-3b49-4067-b9aa-147f97823178",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "d381ddd265b9703f70f6319a0d24c33a82e2230bd1d1992c3365214d6a032e5c"
